@@ -1,0 +1,7 @@
+# Lindungi kantor live dengan kata sandi. Buat hash di server: caddy hash-password
+kantor.domainanda.id {
+    basic_auth {
+        admin <HASH_DARI_caddy_hash-password>
+    }
+    reverse_proxy 127.0.0.1:8080
+}

@@ -1,0 +1,19 @@
+# Contoh menjalankan feed live untuk agent OpenClaw.
+# Jalankan dari folder repo:  docker compose -f server/docker-compose.yml up -d
+services:
+  kantor_ai:
+    image: node:24-alpine
+    container_name: kantor_ai
+    user: "1000:1000"                 # samakan dengan pemilik folder agent OpenClaw
+    working_dir: /app
+    command: ["node", "server/server.mjs"]
+    environment:
+      AGENTS_DIR: /data/agents
+      PUBLIC_DIR: /app
+      # INGEST_TOKEN: ganti-dengan-token-panjang   # aktifkan untuk framework selain OpenClaw
+    volumes:
+      - ..:/app:ro
+      - ~/.openclaw/agents:/data/agents:ro
+    ports:
+      - "127.0.0.1:8080:8080"          # buka ke publik lewat reverse proxy, jangan langsung
+    restart: unless-stopped

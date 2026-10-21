@@ -1,0 +1,348 @@
+{
+ "name": "Kantor AI",
+ "tagline": "Kantor virtual 3D untuk tim AI agent-mu.",
+ "tower": "MENARA AI",
+ "dash": "AI Agent Office",
+ "owner": "Bos",
+ "namePrefix": "Agent ",
+ "idPrefix": "",
+ "bossRoom": "Ruang Kepala",
+ "brand": "",
+ "placeholder": "Tulis tugas, mis. riset tren pasar atau tulis caption",
+ "firstTasks": [
+  "Status singkat tim hari ini?",
+  "Riset tren AI minggu ini"
+ ],
+ "dailyLabel": "laporan harian tim",
+ "simModel": "gpt-4.1-mini",
+ "menu": [
+  "Kopi susu",
+  "Teh tarik",
+  "Kurma",
+  "Air mineral"
+ ],
+ "shalat": true,
+ "prayers": [
+  [
+   "Subuh",
+   "04:35"
+  ],
+  [
+   "Dzuhur",
+   "11:55"
+  ],
+  [
+   "Ashar",
+   "15:15"
+  ],
+  [
+   "Maghrib",
+   "17:55"
+  ],
+  [
+   "Isya",
+   "19:05"
+  ]
+ ],
+ "agents": [
+  {
+   "id": "kepala",
+   "nm": "Agent Kepala",
+   "sh": "Kepala",
+   "rl": "Orkestrator, membagi tugas ke tim",
+   "slot": "kepala",
+   "boss": true,
+   "shirt": "#2F4A6B",
+   "hair": "peci",
+   "skin": "#C99A73",
+   "tools": [
+    "message"
+   ],
+   "samples": [
+    "Status singkat tim hari ini?",
+    "Susun rencana kerja minggu ini"
+   ]
+  },
+  {
+   "id": "penulis",
+   "nm": "Agent Penulis",
+   "sh": "Penulis",
+   "rl": "Menulis artikel, caption, dan email",
+   "slot": "kerja-1",
+   "shirt": "#8C3B3B",
+   "hair": "short",
+   "skin": "#D9A983",
+   "k": [
+    "tulis",
+    "artikel",
+    "caption",
+    "email",
+    "konten",
+    "blog"
+   ],
+   "samples": [
+    "Tulis caption LinkedIn soal AI",
+    "Draf email penawaran"
+   ]
+  },
+  {
+   "id": "analis",
+   "nm": "Agent Analis",
+   "sh": "Analis",
+   "rl": "Mengolah data dan laporan",
+   "slot": "kerja-2",
+   "shirt": "#3E7A57",
+   "hair": "hijab",
+   "hijab": "#2D8C84",
+   "skin": "#E0B48F",
+   "k": [
+    "data",
+    "laporan",
+    "analisis",
+    "grafik",
+    "excel",
+    "angka"
+   ],
+   "samples": [
+    "Rangkum penjualan bulan ini",
+    "Bandingkan KPI kuartal lalu"
+   ]
+  },
+  {
+   "id": "coder",
+   "nm": "Agent Coder",
+   "sh": "Coder",
+   "rl": "Coding, debug, dan otomasi",
+   "slot": "kerja-3",
+   "shirt": "#5B6470",
+   "hair": "messy",
+   "skin": "#C08C66",
+   "k": [
+    "kode",
+    "bug",
+    "sql",
+    "python",
+    "script",
+    "api",
+    "deploy"
+   ],
+   "samples": [
+    "Perbaiki bug form login",
+    "Tulis skrip backup"
+   ]
+  },
+  {
+   "id": "cs",
+   "nm": "Agent CS",
+   "sh": "CS",
+   "rl": "Menjawab pertanyaan pelanggan",
+   "slot": "kerja-4",
+   "shirt": "#B5653A",
+   "hair": "hijab",
+   "hijab": "#C9B08A",
+   "skin": "#DDAE86",
+   "k": [
+    "pelanggan",
+    "komplain",
+    "tiket",
+    "faq",
+    "chat"
+   ],
+   "samples": [
+    "Jawab 5 tiket pelanggan terbaru",
+    "Perbarui FAQ produk"
+   ]
+  },
+  {
+   "id": "riset",
+   "nm": "Agent Riset",
+   "sh": "Riset",
+   "rl": "Riset dan membaca dokumen",
+   "slot": "pustaka",
+   "shirt": "#6D4C8C",
+   "hair": "short",
+   "glasses": true,
+   "skin": "#DDAE86",
+   "tools": [
+    "pdf"
+   ],
+   "k": [
+    "riset",
+    "jurnal",
+    "paper",
+    "referensi",
+    "literatur",
+    "tren"
+   ],
+   "samples": [
+    "Riset tren AI minggu ini",
+    "Ringkas 3 jurnal terbaru"
+   ]
+  },
+  {
+   "id": "ops",
+   "nm": "Agent Ops",
+   "sh": "Ops",
+   "rl": "Server, uptime, dan log",
+   "slot": "server",
+   "shirt": "#D9822B",
+   "hair": "short",
+   "skin": "#C99A73",
+   "tools": [
+    "exec"
+   ],
+   "k": [
+    "server",
+    "vps",
+    "log",
+    "disk",
+    "ram",
+    "uptime"
+   ],
+   "samples": [
+    "Cek RAM dan disk server",
+    "Periksa log error semalam"
+   ]
+  },
+  {
+   "id": "pengingat",
+   "nm": "Agent Pengingat",
+   "sh": "Pengingat",
+   "rl": "Jadwal, pengingat, dan kajian",
+   "slot": "kajian",
+   "shirt": "#E9EEF0",
+   "hair": "pecip",
+   "skin": "#C99A73",
+   "tools": [
+    "web_fetch"
+   ],
+   "cron": true,
+   "k": [
+    "jadwal",
+    "pengingat",
+    "agenda",
+    "kajian",
+    "rapat"
+   ],
+   "samples": [
+    "Cek agenda besok",
+    "Ingatkan jadwal rapat"
+   ]
+  }
+ ],
+ "jobs": [
+  {
+   "id": "desainer",
+   "nm": "Agent Desainer",
+   "sh": "Desainer",
+   "rl": "Desain konten visual",
+   "plot": "timur",
+   "roomSign": "Studio Kreatif",
+   "shirt": "#1E6E62",
+   "hair": "short",
+   "skin": "#D2A27C",
+   "glasses": true,
+   "k": [
+    "desain",
+    "poster",
+    "banner",
+    "visual",
+    "thumbnail"
+   ],
+   "covers": [
+    "Poster",
+    "Banner",
+    "Feed IG",
+    "Thumbnail",
+    "Slide",
+    "Logo"
+   ],
+   "coverBrand": "STUDIO",
+   "duties": [
+    "Membuat draf poster dan banner",
+    "Menyiapkan feed media sosial",
+    "Menjaga konsistensi warna brand"
+   ],
+   "skills": [
+    "desain visual",
+    "teliti",
+    "paham brand"
+   ],
+   "samples": [
+    "Draf poster webinar",
+    "Thumbnail video minggu ini"
+   ]
+  }
+ ],
+ "candidates": [
+  {
+   "id": "sosmed",
+   "nm": "Agent Sosmed",
+   "rl": "Mengelola media sosial"
+  }
+ ],
+ "talks": [
+  [
+   "Laporan pagi sudah beres?",
+   "Sudah, tinggal kirim",
+   "Mantap"
+  ],
+  [
+   "Habis ini padel yuk",
+   "Boleh, yang kalah traktir kopi",
+   "Siapa takut"
+  ],
+  [
+   "Konteksmu masih lega?",
+   "Masih, baru belasan persen",
+   "Hemat token, sip"
+  ],
+  [
+   "Kamu pakai tool apa tadi?",
+   "pdf, baca jurnal",
+   "Rajin bener"
+  ],
+  [
+   "Lanjut kerja?",
+   "Bentar, kopinya belum habis",
+   "Haha, oke"
+  ],
+  [
+   "Sudah dzikir pagi?",
+   "Alhamdulillah sudah",
+   "Barakallahu fiik"
+  ],
+  [
+   "Siapa jaga server malam ini?",
+   "Ops, seperti biasa",
+   "Semangat, Ops!"
+  ],
+  [
+   "Kopi pantry makin enak ya",
+   "Biji baru katanya",
+   "Pantas ramai"
+  ]
+ ],
+ "holoTalks": [
+  [
+   "Tampilkan peta tugas 3D",
+   "Klaster merah itu tenggat minggu ini",
+   "Prioritaskan dulu"
+  ],
+  [
+   "Proyeksi beban kerja bulan depan?",
+   "Grafiknya naik",
+   "Perlu agent baru nih"
+  ],
+  [
+   "Zoom ke alur delegasi",
+   "Kepala ke Riset, lalu lapor balik",
+   "Alurnya rapi"
+  ],
+  [
+   "Simulasikan gangguan provider",
+   "Model cadangan aktif",
+   "Bagus, tangguh"
+  ]
+ ]
+}
