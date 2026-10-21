@@ -1,0 +1,323 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}[hidden]{display:none!important}img{max-width:100%}</style>
+<title>Kelas Kantor AI</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="Kelas praktik membangun kantor virtual 3D untuk tim AI agent, plus jasa kantor custom. Khadam Digital Academy.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+/* Layout: lobi gedung. Hero berupa jendela kantor 3D, kurikulum sebagai papan direktori lantai, lalu jasa, FAQ, dan kontak. */
+:root{
+  --bg:#EEF3F1; --surface:#FFFFFF; --ink:#13302C; --muted:#56706A; --line:#C9D8D3;
+  --brand:#122E2C; --neon:#0E8FA8; --gold:#A87B1C; --gold-ink:#1A1407; --chip:#DDE9E5;
+  --display:"Bricolage Grotesque","Segoe UI",system-ui,sans-serif;
+  --body:"IBM Plex Sans","Segoe UI",system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0C1A19; --surface:#122523; --ink:#E4EFEB; --muted:#8FAAA3; --line:#264340;
+  --brand:#0A1514; --neon:#5FE1FF; --gold:#D9AE4E; --gold-ink:#1A1407; --chip:#1D3633; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0C1A19; --surface:#122523; --ink:#E4EFEB; --muted:#8FAAA3; --line:#264340;
+  --brand:#0A1514; --neon:#5FE1FF; --gold:#D9AE4E; --gold-ink:#1A1407; --chip:#1D3633; color-scheme:dark}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion: reduce){html{scroll-behavior:auto}}
+body{background:var(--bg);color:var(--ink);font:16px/1.6 var(--body);margin:0}
+.wrap{max-width:1080px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+h1,h2,h3{font-family:var(--display);text-wrap:balance;margin:0;line-height:1.1}
+h2{font-size:clamp(26px,4vw,36px);font-weight:800;letter-spacing:-.02em}
+h3{font-size:19px;font-weight:800}
+p{margin:0}
+a{color:inherit}
+.eyebrow{font:500 12px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--neon)}
+.btn{display:inline-flex;align-items:center;gap:8px;border-radius:12px;padding:12px 18px;font-weight:600;text-decoration:none;border:1px solid transparent;cursor:pointer;font-size:15px}
+.btn.primary{background:var(--gold);color:var(--gold-ink)}
+.btn.ghost{border-color:var(--line);color:var(--ink);background:transparent}
+.btn:focus-visible,summary:focus-visible{outline:2px solid var(--neon);outline-offset:3px}
+
+/* hero: jendela ke kantor */
+.hero{background:var(--brand);color:#E8F4F1;padding-block:28px 0}
+.nav{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.logo{font:800 18px var(--display);letter-spacing:-.01em}
+.logo span{color:#5FE1FF}
+.nav a{font-size:14px;color:#BFD8D2}
+.hero-grid{display:grid;grid-template-columns:1.05fr 1fr;gap:36px;align-items:center;padding-block:44px 40px}
+.hero h1{font-size:clamp(34px,5.6vw,58px);font-weight:800;letter-spacing:-.03em}
+.hero h1 em{font-style:normal;color:#5FE1FF}
+.hero .lead{color:#BFD8D2;font-size:18px;margin-top:16px;max-width:52ch}
+.hero .ctas{display:flex;gap:10px;flex-wrap:wrap;margin-top:24px}
+.hero .btn.ghost{border-color:#2E5550;color:#E8F4F1}
+.window{position:relative;border-radius:16px;overflow:hidden;border:1px solid #2E5550;box-shadow:0 18px 50px rgba(0,0,0,.35);background:#0A1514}
+.window img{display:block;width:100%;height:auto;aspect-ratio:1400/860;object-fit:cover}
+.window .bar{display:flex;gap:6px;align-items:center;padding:8px 12px;background:#0F201E;font:500 11px var(--mono);color:#7FA9A1}
+.window .bar i{width:9px;height:9px;border-radius:50%;background:#2E5550;display:inline-block}
+.window .bar b{margin-left:auto;color:#5FE1FF;font-weight:500}
+.facts{display:flex;gap:28px;flex-wrap:wrap;padding-block:18px 26px;border-top:1px solid #23443F;font-size:14px;color:#9FC0B9}
+.facts strong{display:block;font:800 22px var(--display);color:#E8F4F1}
+
+section{padding-block:64px}
+.sec-head{display:flex;flex-direction:column;gap:10px;max-width:64ch;margin-bottom:28px}
+.sec-head p{color:var(--muted)}
+
+/* direktori lantai = kurikulum */
+.directory{background:var(--surface);border:1px solid var(--line);border-radius:16px;overflow:hidden}
+.floor{display:grid;grid-template-columns:96px 1fr;gap:0;border-top:1px solid var(--line)}
+.floor:first-child{border-top:0}
+.floor .lvl{background:var(--chip);display:flex;flex-direction:column;justify-content:center;align-items:center;gap:2px;padding:18px 8px;font:800 26px var(--display);color:var(--ink)}
+.floor .lvl small{font:500 10.5px var(--mono);letter-spacing:.1em;color:var(--muted)}
+.floor .body{padding:20px 22px;min-width:0;display:flex;flex-direction:column;gap:8px}
+.floor ul{margin:0;padding-left:18px;color:var(--muted);font-size:15px}
+.floor li{margin:3px 0}
+.floor .out{font-size:14px}
+.floor .out b{color:var(--neon);font-weight:600}
+.format{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+.chip{background:var(--chip);border-radius:999px;padding:6px 12px;font-size:13.5px}
+.note{margin-top:16px;font-size:14px;color:var(--muted)}
+
+/* untuk siapa */
+.who{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+.who div{border-top:3px solid var(--neon);padding-top:12px;display:flex;flex-direction:column;gap:6px}
+.who p{color:var(--muted);font-size:15px}
+
+/* jasa */
+.service{background:var(--surface);border-block:1px solid var(--line)}
+.svc-grid{display:grid;grid-template-columns:1fr 1fr;gap:32px;align-items:start}
+.svc-grid ul{margin:12px 0 0;padding-left:18px;color:var(--muted)}
+.steps{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:14px;counter-reset:s}
+.steps li{display:grid;grid-template-columns:36px 1fr;gap:12px;align-items:start;counter-increment:s}
+.steps li::before{content:counter(s);width:32px;height:32px;border-radius:50%;background:var(--brand);color:#5FE1FF;display:grid;place-items:center;font:800 15px var(--display)}
+.steps b{display:block}
+.steps span{color:var(--muted);font-size:15px}
+
+/* faq */
+details{border-bottom:1px solid var(--line);padding-block:14px}
+summary{cursor:pointer;font-weight:600;list-style:none;display:flex;justify-content:space-between;gap:12px}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"+";font:800 20px var(--display);color:var(--neon);line-height:1}
+details[open] summary::after{content:"–"}
+details p{color:var(--muted);margin-top:8px;max-width:68ch}
+
+/* tentang & kontak */
+.about{display:grid;grid-template-columns:1.2fr 1fr;gap:32px;align-items:start}
+.about ul{margin:10px 0 0;padding-left:18px;color:var(--muted)}
+.contact{background:var(--brand);color:#E8F4F1;border-radius:18px;padding:28px;display:flex;flex-direction:column;gap:14px}
+.contact p{color:#BFD8D2}
+.contact .btn.ghost{border-color:#2E5550;color:#E8F4F1}
+.contact .ctas{display:flex;flex-direction:column;gap:10px}
+.contact small{color:#8FB3AB;font-size:13px}
+footer{padding-block:28px 40px;color:var(--muted);font-size:13.5px;border-top:1px solid var(--line)}
+footer .wrap{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+
+@media (max-width:860px){
+  .hero-grid,.svc-grid,.about{grid-template-columns:1fr}
+  .who{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media (max-width:480px){
+  .who{grid-template-columns:1fr}
+  .floor{grid-template-columns:70px 1fr}
+  .floor .lvl{font-size:22px}
+  section{padding-block:48px}
+}
+</style>
+
+</head>
+<body>
+<header class="hero">
+  <div class="wrap">
+    <nav class="nav" aria-label="Navigasi">
+      <div class="logo">Kantor<span>AI</span> · Khadam Digital Academy</div>
+      <div style="display:flex;gap:16px;flex-wrap:wrap">
+        <a href="#kurikulum">Kurikulum</a><a href="#jasa">Jasa custom</a><a href="#faq">FAQ</a>
+      </div>
+    </nav>
+    <div class="hero-grid">
+      <div>
+        <p class="eyebrow">Kelas praktik · 3 sesi</p>
+        <h1 style="margin-top:12px">Bangun <em>kantor virtual</em> untuk tim AI agent-mu</h1>
+        <p class="lead">Agent AI Anda bekerja diam-diam di balik log. Di kelas ini Anda membangun kantor 3D tempat mereka terlihat bekerja: duduk di meja, mengantar tugas, rapat, ngopi, sampai shalat berjamaah. Lalu menyambungkannya ke agent sungguhan.</p>
+        <div class="ctas">
+          <a class="btn primary" data-wa="kelas" href="#kontak">Masuk daftar tunggu</a>
+          <a class="btn ghost" href="https://mshadianto.github.io/kantor-ai-lite/" target="_blank" rel="noopener">Coba demo gratis ↗</a>
+        </div>
+      </div>
+      <figure class="window" style="margin:0">
+        <div class="bar"><i></i><i></i><i></i><span>kantor-ai · mode simulasi</span><b>● 8 agent</b></div>
+        <img src="docs/preview.png" alt="Kantor AI: gedung 3D dengan ruang kerja, ruang server, lapangan padel, musholla, dan menara empat lantai. Label nama agent melayang di atas setiap meja." width="1400" height="860">
+      </figure>
+    </div>
+    <div class="facts">
+      <div><strong>1 berkas</strong>agents.json mengatur seluruh kantor</div>
+      <div><strong>4 lantai</strong>menara + atap dengan drone</div>
+      <div><strong>0 isi chat</strong>yang dikirim ke browser</div>
+      <div><strong>MIT</strong>kode dasar gratis di GitHub</div>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section id="kurikulum">
+    <div class="wrap">
+      <div class="sec-head">
+        <p class="eyebrow">Direktori lantai</p>
+        <h2>Naik satu lantai setiap sesi</h2>
+        <p>Kurikulumnya disusun seperti menara di kantor itu sendiri. Setiap sesi berakhir dengan sesuatu yang jalan di layar Anda.</p>
+      </div>
+      <div class="directory">
+        <div class="floor">
+          <div class="lvl">L1<small>LOBI</small></div>
+          <div class="body">
+            <h3>Fondasi: kantor Anda berdiri</h3>
+            <ul>
+              <li>Cara kerja AI agent dan kenapa perlu "dilihat" (observability)</li>
+              <li>Menjalankan Kantor AI Lite di laptop dan di GitHub Pages</li>
+              <li>Mengatur <code>agents.json</code>: nama, peran, meja, warna, lowongan</li>
+              <li>Mengganti papan nama gedung lewat Blender</li>
+            </ul>
+            <p class="out"><b>Hasil:</b> kantor dengan nama dan tim Anda sendiri, online di link Anda.</p>
+          </div>
+        </div>
+        <div class="floor">
+          <div class="lvl">L2<small>SERVER</small></div>
+          <div class="body">
+            <h3>Hidupkan: sambungkan ke agent sungguhan</h3>
+            <ul>
+              <li>Mode live dari OpenClaw, atau framework lain (n8n, LangGraph, CrewAI) lewat ingest bertoken</li>
+              <li>Deploy ke VPS dengan Docker dan Caddy, lengkap dengan HTTPS dan kata sandi</li>
+              <li>Membaca jejak aktivitas: siapa bekerja, berapa lama, di mana macetnya</li>
+            </ul>
+            <p class="out"><b>Hasil:</b> kantor yang bergerak mengikuti kerja agent Anda yang sebenarnya.</p>
+          </div>
+        </div>
+        <div class="floor">
+          <div class="lvl">L3<small>STRATEGI</small></div>
+          <div class="body">
+            <h3>Tata kelola dan cerita</h3>
+            <ul>
+              <li>Privasi sejak desain: menampilkan aktivitas tanpa membocorkan isi percakapan</li>
+              <li>Menulis "deskripsi kerja" agent: tugas, batasan, kapan wajib minta persetujuan</li>
+              <li>Lowongan dan upacara hari pertama kerja untuk agent baru</li>
+              <li>Mengubah kantor Anda jadi konten LinkedIn, Reels, dan status WA</li>
+            </ul>
+            <p class="out"><b>Hasil:</b> agent yang terkendali, dan cerita yang siap dibagikan.</p>
+          </div>
+        </div>
+      </div>
+      <div class="format">
+        <span class="chip">Online live, 3 × 2 jam</span>
+        <span class="chip">Rekaman setiap sesi</span>
+        <span class="chip">Template agents.json & AGENTS.md</span>
+        <span class="chip">Grup diskusi peserta</span>
+      </div>
+      <p class="note">Jadwal dan harga angkatan pertama diumumkan lebih dulu ke daftar tunggu.</p>
+    </div>
+  </section>
+
+  <section style="padding-top:0">
+    <div class="wrap">
+      <div class="sec-head"><p class="eyebrow">Untuk siapa</p><h2>Cocok kalau Anda…</h2></div>
+      <div class="who">
+        <div><h3>Profesional & auditor</h3><p>Sudah memakai AI di pekerjaan dan ingin mengendalikannya dengan rapi.</p></div>
+        <div><h3>Kreator konten</h3><p>Butuh bahan visual yang beda dari sekadar tangkapan layar chat.</p></div>
+        <div><h3>Pemilik usaha</h3><p>Punya atau akan punya "karyawan" AI untuk CS, konten, dan laporan.</p></div>
+        <div><h3>Tim IT kecil</h3><p>Ingin dasbor agent yang enak dilihat atasan, tanpa membangun dari nol.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="jasa" class="service">
+    <div class="wrap svc-grid">
+      <div>
+        <p class="eyebrow">Jasa custom</p>
+        <h2 style="margin-top:10px">Tidak sempat belajar? Kami bangunkan kantornya</h2>
+        <p style="color:var(--muted);margin-top:12px">Untuk tim, komunitas, atau perusahaan yang ingin langsung jadi.</p>
+        <ul>
+          <li>Nama, logo, dan papan nama gedung sesuai brand</li>
+          <li>Ruangan dan meja untuk setiap agent Anda</li>
+          <li>Tersambung ke agent sungguhan (OpenClaw atau framework lain)</li>
+          <li>Dipasang di server Anda atau server kami, dengan HTTPS dan kata sandi</li>
+          <li>Serah terima berikut panduan perawatan</li>
+        </ul>
+      </div>
+      <div>
+        <h3 style="margin-bottom:14px">Alurnya</h3>
+        <ol class="steps">
+          <li><div><b>Konsultasi 30 menit, gratis</b><span>Kenali agent, tim, dan tujuan Anda.</span></div></li>
+          <li><div><b>Rancangan kantor</b><span>Daftar agent, ruangan, dan tampilan disepakati bersama.</span></div></li>
+          <li><div><b>Bangun & sambungkan</b><span>Kantor dipasang dan dihubungkan ke data aktivitas agent.</span></div></li>
+          <li><div><b>Serah terima</b><span>Uji bersama, lalu kantor resmi "dibuka".</span></div></li>
+        </ol>
+        <div style="margin-top:22px"><a class="btn primary" data-wa="jasa" href="#kontak">Jadwalkan konsultasi</a></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="faq">
+    <div class="wrap" style="max-width:820px">
+      <div class="sec-head"><p class="eyebrow">Pertanyaan</p><h2>Yang sering ditanyakan</h2></div>
+      <details><summary>Harus bisa coding?</summary><p>Tidak wajib. Sesi L1 cukup mengubah satu berkas konfigurasi. Sesi L2 memakai perintah salin-tempel yang dipandu langkah demi langkah. Pengalaman memakai terminal akan membantu, tapi bukan syarat.</p></details>
+      <details><summary>Agent saya bukan OpenClaw. Bisa?</summary><p>Bisa. Selain OpenClaw, kantor ini menerima laporan aktivitas lewat endpoint ingest bertoken, sehingga bisa dipakai dengan n8n, LangGraph, CrewAI, atau skrip Anda sendiri.</p></details>
+      <details><summary>Apakah isi percakapan agent ikut tampil?</summary><p>Tidak. Yang dikirim ke browser hanya nama agent, jenis tugas, waktu, durasi, model, nama tool, dan status. Isi prompt dan jawaban tidak pernah keluar dari server Anda.</p></details>
+      <details><summary>Kodenya gratis. Lalu apa yang dibayar?</summary><p>Kode dasarnya memang terbuka (lisensi MIT). Di kelas, Anda membayar bimbingan langsung, template siap pakai, dan pendampingan sampai kantor Anda jalan dengan agent sungguhan. Di jasa custom, Anda membayar hasil jadinya.</p></details>
+      <details><summary>Bisa untuk perusahaan atau instansi?</summary><p>Bisa. Untuk kebutuhan seperti ini, mulai dari konsultasi gratis supaya kebutuhan keamanan dan tempat pemasangannya jelas sejak awal.</p></details>
+    </div>
+  </section>
+
+  <section id="kontak" style="padding-top:0">
+    <div class="wrap about">
+      <div>
+        <p class="eyebrow">Pengajar</p>
+        <h2 style="margin-top:10px">M. Sopian Hadianto</h2>
+        <ul>
+          <li>Praktisi GRC dan audit internal selama hampir 20 tahun</li>
+          <li>#1 Creator Compliance & Ethics Indonesia (Favikon 2025)</li>
+          <li>Membangun dan memakai sendiri Kantor MONI: 9 agent AI untuk audit, riset, coding, server, dan penerbitan</li>
+          <li>Pendiri Khadam Digital</li>
+        </ul>
+      </div>
+      <div class="contact">
+        <h3>Mulai dari sini</h3>
+        <p>Kirim pesan singkat. Saya balas dengan jadwal kelas atau waktu konsultasi.</p>
+        <div class="ctas">
+          <a class="btn primary" data-wa="kelas" href="https://mshadianto.id" target="_blank" rel="noopener">Daftar tunggu kelas</a>
+          <a class="btn ghost" data-wa="jasa" href="https://mshadianto.id" target="_blank" rel="noopener">Konsultasi jasa custom</a>
+        </div>
+        <small id="kontak-info">Atau kunjungi mshadianto.id</small>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>© 2026 Khadam Digital · Kantor AI Lite berlisensi MIT</span>
+    <span><a href="https://github.com/mshadianto/kantor-ai-lite" target="_blank" rel="noopener">Kode di GitHub ↗</a></span>
+  </div>
+</footer>
+
+<script>
+/* Isi nomor WhatsApp (format internasional tanpa +, contoh 6281234567890).
+   Selama kosong, tombol mengarah ke mshadianto.id. */
+const WA = "628159658833";
+const PESAN = {
+  kelas: "Assalamu'alaikum, saya mau masuk daftar tunggu kelas Kantor AI.",
+  jasa: "Assalamu'alaikum, saya tertarik jasa kantor AI custom. Bisa jadwalkan konsultasi?"
+};
+if (WA) {
+  document.querySelectorAll("[data-wa]").forEach(a => {
+    a.href = "https://wa.me/" + WA + "?text=" + encodeURIComponent(PESAN[a.dataset.wa]);
+    a.target = "_blank"; a.rel = "noopener";
+  });
+  const info = document.getElementById("kontak-info");
+  if (info) info.textContent = "WhatsApp: +" + WA;
+}
+</script>
+
+</body>
+</html>

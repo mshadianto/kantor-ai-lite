@@ -62,6 +62,9 @@ docs/                 konfigurasi & integrasi
 
 ## Butuh bantuan?
 
+👉 **[Kelas & jasa Kantor AI](https://mshadianto.github.io/kantor-ai-lite/kelas.html)**
+
+
 Repo ini gratis (MIT). Kalau Anda ingin:
 - **kantor custom** untuk tim atau perusahaan (logo, ruangan, terhubung ke agent Anda), atau
 - **belajar membangunnya** dalam kelas praktik bersama Khadam Digital Academy,
