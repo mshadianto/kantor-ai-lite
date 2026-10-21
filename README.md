@@ -4,6 +4,8 @@
 
 ![Pratinjau Kantor AI](docs/preview.png)
 
+🔗 **Coba demonya:** [ai-virtuoffice.mshadianto.id](https://ai-virtuoffice.mshadianto.id) · **Kelas & jasa:** [ai-virtuoffice.mshadianto.id/kelas.html](https://ai-virtuoffice.mshadianto.id/kelas.html)
+
 - 🖥️ Satu berkas HTML + three.js, tanpa build step, jalan di browser dan bisa di-install sebagai aplikasi (PWA)
 - 🧩 Semua agent, ruangan, dan lowongan diatur dari **satu berkas `agents.json`**
 - 📡 **Mode live**: membaca aktivitas asli agent OpenClaw, atau framework apa pun lewat `POST /api/ingest`
@@ -62,7 +64,7 @@ docs/                 konfigurasi & integrasi
 
 ## Butuh bantuan?
 
-👉 **[Kelas & jasa Kantor AI](https://mshadianto.github.io/kantor-ai-lite/kelas.html)**
+👉 **[Kelas & jasa Kantor AI](https://ai-virtuoffice.mshadianto.id/kelas.html)**
 
 
 Repo ini gratis (MIT). Kalau Anda ingin:
