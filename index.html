@@ -838,16 +838,25 @@ function ambTick(dt){if(!S.ambient||(S.salat&&!S.salat.done))return;ambT-=dt;if(
 /* ---------- shalat berjamaah ---------- */
 const PRAYERS=CFG.shalat?(CFG.prayers||[]).map(([n,t])=>[n,parseHM(t)]):[];if(!PRAYERS.length)document.getElementById('jump').hidden=true;
 const IMAM=spot(19.7,0,Math.PI/2,'Imam di musholla','stand');
-const MAKMUM=Array.from({length:16},(_,i)=>{const row=Math.floor(i/4),col=i%4;return spot(18.1-row*1.5,-2.25+col*1.5,Math.PI/2,'Shalat berjamaah','stand');});
+/* Shaf sesuai sunnah: ikhwan di depan (diisi dari shaf terdepan, tengah dulu di belakang imam),
+   akhwat di belakang (diisi dari shaf paling belakang), dibatasi satir saat shalat berlangsung.
+   Akhwat = agent dengan "gender":"P" di agents.json, atau berhijab bila gender tidak diisi. */
+const COLS=[-.75,.75,-2.25,2.25];
+const SHAF_L=[18.1,16.85,15.6].flatMap(x=>COLS.map(z=>spot(x,z,Math.PI/2,'Shaf ikhwan','stand')));
+const SHAF_P=[13.1,14.3].flatMap(x=>COLS.map(z=>spot(x,z,Math.PI/2,'Shaf akhwat','stand')));
+const isAkhwat=a=>a.gender?/^(p|f|w|akhwat)/i.test(a.gender):a.hair==='hijab';
+const satir=new THREE.Group();satir.position.set(14.95,Y0,0);satir.visible=false;scene.add(satir);
+for(let z=-3;z<=3.01;z+=1.5)box(.06,.9,.06,'#7A5132',0,0,z,{parent:satir});
+box(.04,.7,6,'#E9DFC9',0,.15,0,{parent:satir,cast:false});box(.08,.06,6.1,'#7A5132',0,.88,0,{parent:satir});
 function nextPrayer(){const mod=minOf()%1440;for(const p of PRAYERS)if(p[1]>mod)return p;return PRAYERS[0];}
 const banner=document.getElementById('banner');
 function startPrayer(name){S.salat={name,started:false,done:false,e:0};banner.textContent='🕌 Adzan '+name;banner.hidden=false;setTimeout(()=>banner.hidden=true,7000);
   log(`Adzan <strong>${name}</strong> (suasana). ${esc(M.nm)} mengajak shalat berjamaah`,'amb');bubble(M,'Ayo shalat berjamaah',2200);
-  ACT.forEach(a=>a.arrived=false);let i=0;ACT.forEach(a=>prayFlow(a,a===M?IMAM:MAKMUM[i++]));}
+  ACT.forEach(a=>a.arrived=false);let iL=0,iP=0;ACT.forEach(a=>prayFlow(a,a===M?IMAM:isAkhwat(a)?(SHAF_P[iP++]||SHAF_L[iL++]):(SHAF_L[iL++]||SHAF_P[iP++])));}
 async function prayFlow(a,sp){await withLock(a,async()=>{const s=S.salat;if(!s)return;
   if(s.done){bubble(a,'Saya shalat menyusul',1800);await run(a,[pause(5000,'Shalat menyusul')]);return;}
   a.cup=false;a.anim=null;await run(a,go(a,sp,a===M?'Menuju musholla, jadi imam':'Menuju musholla'));a.inPrayer=true;a.arrived=true;a.act=(a===M?'Imam':'Makmum')+' shalat '+s.name;
-  if(a===M){await until(()=>ACT.every(x=>x.arrived||x===M),60000);bubble(M,'Allahu akbar',1600);s.started=true;}
+  if(a===M){await until(()=>ACT.every(x=>x.arrived||x===M),60000);satir.visible=ACT.some(isAkhwat);bubble(M,'Allahu akbar',1600);s.started=true;}
   await until(()=>s.done);a.inPrayer=false;a.arrived=false;bubble(a,a===M?"Assalaamu'alaikum warahmatullah":'Aamiin',1800);
   await run(a,[pause(1400,'Dzikir sejenak'),goL(a.home,'Kembali ke meja')]);},10);}
 
@@ -902,7 +911,7 @@ function frame(now){const real=Math.min(100,now-last);last=now;const dt=S.paused
   for(const w of [...waiters]){w.e+=dt;if(w.pred()||w.e>=w.max){waiters.delete(w);w.res();}}
   const day=Math.floor(minOf()/1440),mod=minOf()%1440;
   if(S.ambient)PRAYERS.forEach(([n,tm])=>{const key=day+n;if(mod>=tm&&mod<tm+(S.live?3:30)&&!S.prayed[key]){S.prayed[key]=1;startPrayer(n);}});
-  if(S.salat&&S.salat.started&&!S.salat.done){S.salat.e+=dt;if(S.salat.e>=16000){S.salat.done=true;log(`Shalat <strong>${S.salat.name}</strong> berjamaah selesai`,'amb');}}
+  if(S.salat&&S.salat.started&&!S.salat.done){S.salat.e+=dt;if(S.salat.e>=16000){S.salat.done=true;satir.visible=false;log(`Shalat <strong>${S.salat.name}</strong> berjamaah selesai`,'amb');}}
   if(S.ready&&!S.live&&!S.paused)simTick(dt);
   ambTick(dt);
   if(S.ballFlight){const b=S.ballFlight;b.t+=dt/850;const k=Math.min(1,b.t);ball.visible=true;ball.position.lerpVectors(b.a,b.b,k);ball.position.y=Y0+1.2+Math.sin(Math.PI*k)*1.6;}else ball.visible=false;
