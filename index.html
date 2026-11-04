@@ -161,6 +161,7 @@ dt{color:var(--muted)} dd{margin:0;overflow-wrap:anywhere}
     <button class="btn ghost" type="button" id="cam">Reset kamera</button>
     <button class="btn ghost paneltoggle" type="button" id="ptog">Panel</button>
     <button class="btn ghost" type="button" id="theme">Tema</button>
+    <a class="btn ghost" href="stasiun.html" style="text-decoration:none">Stasiun Ribath ✦</a>
     <p class="hint" id="hint"></p>
   </form>
 </div>
@@ -173,6 +174,10 @@ import * as THREE from 'three';
 import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
 import {CSS2DRenderer, CSS2DObject} from 'three/addons/renderers/CSS2DRenderer.js';
 import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
+import {EffectComposer} from 'three/addons/postprocessing/EffectComposer.js';
+import {RenderPass} from 'three/addons/postprocessing/RenderPass.js';
+import {UnrealBloomPass} from 'three/addons/postprocessing/UnrealBloomPass.js';
+import {OutputPass} from 'three/addons/postprocessing/OutputPass.js';
 
 /* ================= konfigurasi kantor: semua yang khas satu kantor ada di sini =================
    Urutan sumber: window.KANTOR_CONFIG (disisipkan saat build) → agents.json di folder yang sama → DEFAULT_CFG. */
@@ -421,8 +426,8 @@ const plotWAG=plotDeco(0,10,CAND0?CAND0.nm:'Agent baru'),plotKDP=plotDeco(14,10,
 const roomLights=[[-14,-10],[0,-10],[14,-10],[-14,0],[0,0],[14,0],[-14,10]].map(([x,z])=>{const l=new THREE.PointLight('#FFD9A0',0,16,1.6);l.position.set(x,Y0+2.6,z);scene.add(l);return l;});
 
 /* ================= model gedung dari Blender ================= */
-let shellSrc='kode';
-const loader=new GLTFLoader(),onShell=g=>{
+let shellSrc='kode',SHELL_ROOT=null;
+const loader=new GLTFLoader(),onShell=g=>{SHELL_ROOT=g.scene;if(window.STN_SHELL)window.STN_SHELL(g.scene);
   g.scene.traverse(o=>{if(!o.isMesh)return;o.receiveShadow=true;o.castShadow=true;const m=o.material;
     if(m&&m.transparent){o.castShadow=false;m.depthWrite=false;}
     if(m&&/Pelataran|Plat|Tangga|Setapak|Kanstin/.test(m.name))o.castShadow=false;
@@ -494,6 +499,81 @@ function towerView(k){S.follow=false;setCut(k);$('view').value='';
   const y=k===5?TOWER_TOP:Y0+floorY(k);flyTo(k===5?V(15,y+11,-6):V(12,y+6.5,-10),V(0,y+(k===5?1:.6),-26),1500);S.sel='floor:'+k;renderDetail();}
 floorSigns.forEach(([m,k])=>tw(k,m));tw(5,towerSign);
 const towerLights=[1,2,3,4].map(k=>{const l=new THREE.PointLight(k===2?'#8F7BFF':'#BDF4FF',0,14,1.6);l.position.set(0,Y0+floorY(k)+2.6,-26);scene.add(l);return l;});
+
+/* ================= Gaya Stasiun: kantor melayang di orbit, tepi kapsul bercahaya (selaras stasiun.html) =================
+   Aktif bawaan. Matikan lewat tombol "Gaya" atau ?gaya=klasik. Hanya mengubah tampilan; simulasi & jalur agent tetap. */
+const STN=(()=>{
+  let pref=null;try{pref=localStorage.getItem('diwan-gaya');}catch(e){}
+  const st={on:(new URLSearchParams(location.search).get('gaya')||pref||'stasiun')!=='klasik'};
+  const grp=new THREE.Group();grp.visible=false;scene.add(grp);
+  // tekstur pelangi yang mengalir
+  const rc=document.createElement('canvas');rc.width=512;rc.height=8;
+  {const x=rc.getContext('2d'),g=x.createLinearGradient(0,0,512,0);['#ff6ad5','#c774e8','#8f8cff','#55c8ff','#6dffe0','#ffe28a','#ff9f6a','#ff6ad5'].forEach((s,i,a)=>g.addColorStop(i/(a.length-1),s));x.fillStyle=g;x.fillRect(0,0,512,8);}
+  const TXS=[],GM={};
+  function gmat(rep,clip){const k=rep+(clip?'c':'');if(GM[k])return GM[k];const t=new THREE.CanvasTexture(rc);t.colorSpace=THREE.SRGBColorSpace;t.wrapS=THREE.RepeatWrapping;t.repeat.set(rep,1);TXS.push(t);
+    const m=new THREE.MeshBasicMaterial({map:t,color:new THREE.Color(3,3,3),fog:false});if(clip)m.clippingPlanes=[cutPlane];return GM[k]=m;}
+  function rim(pts,closed,r,rep,clip){const cp=new THREE.CurvePath(),n=pts.length;for(let i=0;i<(closed?n:n-1);i++)cp.add(new THREE.LineCurve3(pts[i],pts[(i+1)%n]));
+    const m=new THREE.Mesh(new THREE.TubeGeometry(cp,Math.max(32,n*24),r,8,closed),gmat(rep,clip));grp.add(m);return m;}
+  const rect=(x0,x1,z0,z1,y)=>[V(x0,y,z0),V(x1,y,z0),V(x1,y,z1),V(x0,y,z1)];
+  rim(rect(-26.07,26.07,-34.07,20.07,.4),true,.12,6);          // tepi platform
+  rim(rect(-26.07,26.07,-34.07,20.07,-1.62),true,.08,6);       // tepi bawah lambung
+  rim(rect(-21.42,21.42,-15.42,15.42,.42),true,.06,5);         // kaki kantor
+  rim(rect(-21.25,21.25,-15.25,15.25,3.1),true,.085,5);        // bibir dinding kantor
+  [0,1,2,3,4].forEach(k=>rim(rect(-8.4,8.4,-32.4,-19.6,Y0+k*FH),true,.08,3,true)); // tiap lantai menara (ikut dipotong lift)
+  [[-8.4,-32.4],[8.4,-32.4],[8.4,-19.6],[-8.4,-19.6]].forEach(([x,z])=>rim([V(x,Y0,z),V(x,Y0+4*FH,z)],false,.06,2,true));
+  // lambung & lunas di bawah platform
+  const HULL=new THREE.MeshStandardMaterial({color:'#D9DEE6',roughness:.38,metalness:.4});
+  const base=new THREE.Mesh(new THREE.BoxGeometry(52.12,1.62,54.12),HULL);base.position.set(0,-.81,-7);base.receiveShadow=true;grp.add(base);
+  const keel=new THREE.Mesh(new THREE.CylinderGeometry(22,7,9,8),HULL);keel.rotation.y=Math.PI/8;keel.scale.set(1.15,1,1.2);keel.position.set(0,-6.12,-7);grp.add(keel);
+  const kr=new THREE.Mesh(new THREE.TorusGeometry(7.3,.1,8,64),gmat(3));kr.rotation.x=Math.PI/2;kr.scale.set(1.15,1.2,1);kr.position.set(0,-10.5,-7);grp.add(kr);
+  const thr=new THREE.Mesh(new THREE.CircleGeometry(4.2,48),new THREE.MeshBasicMaterial({color:new THREE.Color('#5fd8ff').multiplyScalar(2.4),fog:false,side:THREE.DoubleSide}));thr.rotation.x=Math.PI/2;thr.position.set(0,-10.66,-7);grp.add(thr);
+  const nav=[[-26,-34,'#ff4d6d'],[26,-34,'#4dff9a'],[26,20,'#4dff9a'],[-26,20,'#ff4d6d']].map(([x,z,c])=>{const m=new THREE.Mesh(new THREE.SphereGeometry(.22,12,10),new THREE.MeshBasicMaterial({color:new THREE.Color(c).multiplyScalar(3),fog:false}));m.position.set(x,.75,z);grp.add(m);return m;});
+  // bintang & planet
+  const N=2600,pos=new Float32Array(N*3),col=new Float32Array(N*3);
+  for(let i=0;i<N;i++){const u=Math.random()*2-1,a=Math.random()*Math.PI*2,r=420+Math.random()*90,s=Math.sqrt(1-u*u),c=.55+Math.random()*.45;
+    pos.set([r*s*Math.cos(a),r*u,r*s*Math.sin(a)],i*3);col.set([c*.9,c*.93,c],i*3);}
+  const sg=new THREE.BufferGeometry();sg.setAttribute('position',new THREE.BufferAttribute(pos,3));sg.setAttribute('color',new THREE.BufferAttribute(col,3));
+  grp.add(new THREE.Points(sg,new THREE.PointsMaterial({size:1.7,sizeAttenuation:false,vertexColors:true,fog:false})));
+  const ptex=canvasTex(512,256,(x,w,h)=>{const g=x.createLinearGradient(0,0,0,h);g.addColorStop(0,'#173a7a');g.addColorStop(.5,'#1f5fa8');g.addColorStop(1,'#0e2a5e');x.fillStyle=g;x.fillRect(0,0,w,h);
+    for(let i=0;i<70;i++){x.fillStyle=`rgba(${180+Math.random()*75|0},${220+Math.random()*35|0},255,${.05+Math.random()*.18})`;x.fillRect(0,Math.random()*h,w,2+Math.random()*10);}});
+  const planet=new THREE.Mesh(new THREE.SphereGeometry(150,64,48),new THREE.MeshStandardMaterial({map:ptex,roughness:1,fog:false}));planet.position.set(-420,-300,-620);grp.add(planet);
+  const atm=new THREE.Mesh(new THREE.SphereGeometry(160,64,48),new THREE.MeshBasicMaterial({color:'#4f8cff',transparent:true,opacity:.2,side:THREE.BackSide,blending:THREE.AdditiveBlending,depthWrite:false,fog:false}));atm.position.copy(planet.position);grp.add(atm);
+  // bahan cangkang Blender: dinding jadi lambung putih, plaza jadi dek gelap, pepohonan & jalan setapak disimpan
+  const HC={Dinding:'#E6EAF0',DindingKerja:'#E6EAF0',DindingMain:'#E6EAF0',DindingPustaka:'#E6EAF0',DindingServer:'#DCE1E9',DindingPantry:'#E6EAF0',DindingKavling:'#E6EAF0',DindingMenara:'#E6EAF0',
+    Kolom:'#F3F5F8',Plin:'#AEB7C4',ListTepi:'#F3F5F8',RangkaMenara:'#D7DCE4',KusenJendela:'#C7CED8',Kanopi:'#E6EAF0',PutihFuturis:'#F3F5F8',
+    Pelataran:'#1A2030',Kanstin:'#2A3243',Tangga:'#2A3243',PlatLantai:'#C9CED6',LantaiMenara:'#C9CED6',Tiang:'#C7CED8',PapanNama:'#1A2030'};
+  const HIDE=/^(Daun\d|Batang|BatuSetapak)$/,orig=new Map(),hid=[];
+  function shell(root){root.traverse(o=>{if(!o.isMesh||!o.material)return;const m=o.material,n=m.name||'';
+    if(HIDE.test(n))hid.push(o);
+    if((HC[n]||/^Kaca/.test(n)||n==='LEDMenara')&&!orig.has(m))orig.set(m,{c:m.color.clone(),r:m.roughness,mt:m.metalness,map:m.map,e:m.emissive?m.emissive.clone():null,ei:m.emissiveIntensity});});
+    apply();}
+  window.STN_SHELL=shell;
+  const HEMI0=[hemi.color.clone(),hemi.groundColor.clone()];
+  function apply(){const on=st.on;
+    for(const[m,o]of orig){const n=m.name;
+      if(on){if(HC[n]){m.color.set(HC[n]);m.roughness=.4;m.metalness=.35;m.map=null;}else if(/^Kaca/.test(n))m.color.set('#9fe8ff');else if(n==='LEDMenara'&&m.emissive){m.emissive.set('#7fdcff');m.emissiveIntensity=2.2;}}
+      else{m.color.copy(o.c);m.roughness=o.r;m.metalness=o.mt;m.map=o.map;if(o.e){m.emissive.copy(o.e);m.emissiveIntensity=o.ei;}}
+      m.needsUpdate=true;}
+    hid.forEach(o=>o.visible=!on);ground.visible=!on;grp.visible=on;
+    camera.far=on?1200:500;camera.updateProjectionMatrix();
+    if(on){scene.background.set('#03050b');scene.fog.color.set('#03050b');scene.fog.near=170;scene.fog.far=560;
+      if(!document.documentElement.dataset.theme)document.documentElement.dataset.theme='dark';}
+    else{scene.fog.near=90;scene.fog.far=190;hemi.color.copy(HEMI0[0]);hemi.groundColor.copy(HEMI0[1]);}
+    const b=document.getElementById('gaya');if(b){b.textContent='Gaya: '+(on?'Stasiun':'Klasik');b.setAttribute('aria-pressed',String(on));}}
+  function lighting(){sun.intensity=1.35;sun.position.set(-30,45,25);hemi.intensity=.6;hemi.color.set('#cfe0ff');hemi.groundColor.set('#1a1f33');
+    roomLights.forEach(l=>l.intensity=7);towerLights.forEach(l=>l.intensity=12);lamp.intensity=5;gymLight.intensity=3;bulbMat.emissiveIntensity=1.2;}
+  // bloom hanya di gaya stasiun
+  const comp=new EffectComposer(renderer);comp.addPass(new RenderPass(scene,camera));comp.addPass(new UnrealBloomPass(new THREE.Vector2(256,256),.6,.4,1.05));comp.addPass(new OutputPass());
+  const rs=()=>comp.setSize(app.clientWidth,app.clientHeight);addEventListener('resize',rs);rs();
+  let navT=0;
+  function tick(real){if(!st.on)return;for(const t of TXS)t.offset.x=(t.offset.x+real*.00006)%1;navT+=real;const blink=Math.floor(navT/600)%2===0;nav.forEach((m,i)=>m.visible=i%2?blink:!blink);
+    thr.material.color.setScalar(1).set('#5fd8ff').multiplyScalar(2+Math.sin(navT/300)*.6);}
+  function render(){if(st.on)comp.render();else renderer.render(scene,camera);}
+  // tombol gaya di dock
+  const b=document.createElement('button');b.type='button';b.className='btn ghost';b.id='gaya';document.getElementById('theme').before(b);
+  b.addEventListener('click',()=>{st.on=!st.on;try{localStorage.setItem('diwan-gaya',st.on?'stasiun':'klasik');}catch(e){}apply();});
+  if(SHELL_ROOT)shell(SHELL_ROOT);else apply();
+  return{get on(){return st.on;},lighting,tick,render};})();
 
 /* ================= agent ================= */
 const AG=CFG.agents.map(a=>Object.assign({},a));
@@ -900,7 +980,7 @@ detect().then(live=>{S.live=live;S.ready=true;
 /* ================= loop ================= */
 const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
 const skyDay=new THREE.Color('#BFE3F2'),skyEve=new THREE.Color('#F2B98C'),skyNight=new THREE.Color('#0F1B30');
-function lighting(){const m=minOf()%1440;let day;if(m<300||m>=1170)day=0;else if(m<390)day=(m-300)/90;else if(m>=1050)day=1-(m-1050)/120;else day=1;
+function lighting(){if(STN.on){STN.lighting();return;}const m=minOf()%1440;let day;if(m<300||m>=1170)day=0;else if(m<390)day=(m-300)/90;else if(m>=1050)day=1-(m-1050)/120;else day=1;
   const eve=(m>=990&&m<1170)||(m>=300&&m<420);const sky=skyNight.clone().lerp(eve?skyEve:skyDay,day);scene.background.copy(sky);scene.fog.color.copy(sky);
   sun.intensity=.15+1.45*day;hemi.intensity=.25+.65*day;const ang=(m/1440)*Math.PI*2-Math.PI/2;sun.position.set(Math.cos(ang)*40,30+20*day,25);
   const night=1-day;roomLights.forEach(l=>l.intensity=night*14);towerLights.forEach(l=>l.intensity=4+night*12);lamp.intensity=night*6+2;gymLight.intensity=night*6;bulbMat.emissiveIntensity=.25+night*2.2;}
@@ -943,7 +1023,7 @@ function frame(now){const real=Math.min(100,now-last);last=now;const dt=S.paused
     _sph.set(a.radius+(b.radius-a.radius)*e,a.phi+(b.phi-a.phi)*e,a.theta+camTw.dth*e);
     camera.position.copy(controls.target).add(_v3.setFromSpherical(_sph));if(k>=1)camTw=null;}
   if(camGoal){controls.target.lerp(camGoal,.08);if(controls.target.distanceTo(camGoal)<.05)camGoal=null;}
-  controls.update();renderer.render(scene,camera);labelR.render(scene,camera);
+  controls.update();STN.tick(real);STN.render();labelR.render(scene,camera);
   detT+=real;if(detT>300){detT=0;renderDetail();}statT+=real;if(statT>5000){statT=0;stats();}
   requestAnimationFrame(frame);}
 requestAnimationFrame(frame);
